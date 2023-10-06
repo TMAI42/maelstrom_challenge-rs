@@ -104,12 +104,12 @@ fn main() -> anyhow::Result<()> {
     let (mut state, message) = EchoNode::init(init_msg)?;
 
     message.send(&mut stdout)?;
-    println!("Hello");
-    let _ = stdin.into_iter().map(|line|{
-        let message : Message<EchoData> = serde_json::from_str(&line?).context("deserialize message")?;
-        state.handle(message)?
-            .send(&mut stdout)
-    });
+
+    for line in stdin {
+        let mut message : Message<EchoData> = serde_json::from_str(&line?).context("deserialize message")?;
+        message = state.handle(message)?;
+        message.send(&mut stdout)?;
+    }
 
     Ok(())
 }
